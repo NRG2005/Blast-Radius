@@ -7,9 +7,17 @@ import os
 from pathlib import Path
 from typing import NamedTuple
 
-# Files we care about for Python repos
-INCLUDE_EXTENSIONS = {".py", ".json", ".yaml", ".yml", ".toml", ".cfg", ".ini", ".txt", ".md"}
-EXCLUDE_DIRS = {"__pycache__", ".git", ".pytest_cache", ".venv", "venv", "node_modules", ".mypy_cache"}
+# Source/config extensions across common backend + web-frontend stacks
+INCLUDE_EXTENSIONS = {
+    ".py", ".json", ".yaml", ".yml", ".toml", ".cfg", ".ini", ".txt", ".md",
+    ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".vue",
+    ".css", ".scss", ".html", ".ejs",
+    ".go", ".rb", ".java", ".rs",
+}
+EXCLUDE_DIRS = {
+    "__pycache__", ".git", ".git-seed-backup", ".pytest_cache", ".venv", "venv",
+    "node_modules", ".mypy_cache", "dist", "build", "coverage", ".next", ".nuxt",
+}
 MAX_FILE_SIZE = 50_000  # bytes — skip very large generated files
 MAX_FILES = 40          # cap total files to keep LLM context manageable
 

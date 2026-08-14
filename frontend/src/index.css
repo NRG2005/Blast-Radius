@@ -176,6 +176,13 @@ html, body, #root { height: 100%; }
   color: var(--text-muted);
 }
 
+.input-label-optional {
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
 .input-select,
 .input-textarea {
   background: var(--bg-elevated);
