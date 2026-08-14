@@ -1,0 +1,22 @@
+{
+  "id": "user-api",
+  "name": "User API",
+  "description": "REST API for user management with JSON serialization",
+  "change_description": "Rename the 'username' field to 'user_name' in the User dataclass to follow our new snake_case naming convention",
+  "change_file": "user_api/models.py",
+  "change_line": 14,
+  "diff": "--- a/user_api/models.py\n+++ b/user_api/models.py\n@@ -12,7 +12,7 @@ class User:\n     \"\"\"Represents an authenticated user in the system.\"\"\"\n     # THE FIELD NAME IS UNDER CHANGE\n     # Scenario: rename `username` → `user_name` to follow our new naming convention.\n-    username: str  # login handle, unique per tenant\n+    user_name: str  # login handle, unique per tenant\n     email: str\n     tenant_id: str\n     is_active: bool = True\n",
+  "test_command": "python3 -m pytest -v -m 'not slow'",
+  "expected_breaks": [
+    "user_api/tests/test_models.py::TestUserSerialization::test_user_json_contains_username_key",
+    "user_api/tests/test_models.py::TestUserSerialization::test_json_does_not_contain_user_name_key",
+    "user_api/tests/test_models.py::TestUserCreation::test_create_user_with_all_fields",
+    "user_api/tests/test_models.py::TestUserEquality::test_equal_users",
+    "user_api/tests/test_models.py::TestUserEquality::test_different_usernames_not_equal",
+    "user_api/tests/test_models.py::TestUserSerialization::test_from_dict_round_trips",
+    "user_api/tests/test_serializer.py::TestSerializeUser::test_serialized_output_matches_contract",
+    "user_api/tests/test_serializer.py::TestSerializeUser::test_username_value_preserved",
+    "user_api/tests/test_serializer.py::TestValidateUserPayload::test_required_fields_set"
+  ],
+  "key_insight": "Tests check the serialized JSON output for the string '\"username\"' without ever accessing user.username directly. A field rename ripples through JSON output and breaks hardcoded API contract assertions."
+}

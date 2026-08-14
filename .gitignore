@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.env
+node_modules/
+dist/
+.DS_Store
+
+# temp backup of nested seed-repo .git dirs during initial push
+.git-seed-backup/

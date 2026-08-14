@@ -1,0 +1,15 @@
+{
+  "id": "cache-lib",
+  "name": "Cache Library",
+  "description": "In-memory TTL cache used for configuration and session data",
+  "change_description": "Reduce DEFAULT_TTL from 300s to 60s to get fresher data more frequently",
+  "change_file": "cache_lib/cache.py",
+  "change_line": 13,
+  "diff": "--- a/cache_lib/cache.py\n+++ b/cache_lib/cache.py\n@@ -9,7 +9,7 @@ from typing import Any, Optional\n \n # THIS IS THE VALUE UNDER CHANGE\n # Scenario: reduce default TTL from 300s to 60s for \"fresher\" data.\n-DEFAULT_TTL = 300  # seconds — entries live for 5 minutes by default\n+DEFAULT_TTL = 60   # seconds — entries live for 1 minute by default\n \n \n class TTLCache:\n",
+  "test_command": "python3 -m pytest -v -m 'not slow'",
+  "expected_breaks": [
+    "cache_lib/tests/test_cache.py::TestDefaultTTLValue::test_default_ttl_is_five_minutes",
+    "cache_lib/tests/test_cache.py::TestDefaultTTLValue::test_default_ttl_exceeds_integration_test_sleep"
+  ],
+  "key_insight": "The ConfigCache inherits DEFAULT_TTL. Tests check the exact value (300) and the logical invariant (TTL > 61s) that an integration test depends on. The integration test (slow) would sleep 61s and find entries expired."
+}

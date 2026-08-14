@@ -1,0 +1,14 @@
+{
+  "id": "payment-service",
+  "name": "Payment Service",
+  "description": "Microservice handling payment charges with upstream user credit lookup",
+  "change_description": "Change the default timeout on fetch_user from 5s to 2s to speed up the service",
+  "change_file": "payment_service/client.py",
+  "change_line": 13,
+  "diff": "--- a/payment_service/client.py\n+++ b/payment_service/client.py\n@@ -8,7 +8,7 @@ import time\n \n # THIS IS THE VALUE UNDER CHANGE\n # Scenario: we want to reduce this from 5.0 to 2.0 to \"speed up\" the service.\n-DEFAULT_TIMEOUT = 5.0  # seconds\n+DEFAULT_TIMEOUT = 2.0  # seconds\n \n \n def fetch_user(user_id: str, timeout: float = DEFAULT_TIMEOUT) -> dict:\n",
+  "test_command": "python3 -m pytest -v -m 'not slow'",
+  "expected_breaks": [
+    "payment_service/tests/test_billing.py::TestRetryTimingAssumptions::test_charge_with_real_timeout_budget"
+  ],
+  "key_insight": "The billing retry loop was designed assuming a ~5s per-call timeout. Reducing it to 2s makes the total retry window too tight for the SLA monitoring thresholds, without billing.py ever importing DEFAULT_TIMEOUT directly."
+}
