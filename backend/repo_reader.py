@@ -20,6 +20,7 @@ EXCLUDE_DIRS = {
 }
 MAX_FILE_SIZE = 50_000  # bytes — skip very large generated files
 MAX_FILES = 40          # cap total files to keep LLM context manageable
+HARD_FILE_CAP = 2000    # sanity ceiling for read_repo_tree on pathological repos
 
 
 class SourceFile(NamedTuple):
@@ -56,6 +57,41 @@ def read_repo(repo_path: str) -> list[SourceFile]:
 
             if len(files) >= MAX_FILES:
                 return files
+
+    return sorted(files, key=lambda f: f.path)
+
+
+def read_repo_tree(repo_path: str) -> list[SourceFile]:
+    """
+    Like `read_repo`, but without the MAX_FILES cap (only a much higher
+    sanity ceiling). Used by the repo-scaling pipeline, which needs to see
+    every file to decide what's relevant rather than silently truncating at
+    the first 40 alphabetically. `read_repo` itself is untouched — the
+    seed-repo demo path never calls this function.
+    """
+    root = Path(repo_path).resolve()
+    files: list[SourceFile] = []
+
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
+
+        for filename in sorted(filenames):
+            filepath = Path(dirpath) / filename
+            if filepath.suffix not in INCLUDE_EXTENSIONS:
+                continue
+            if filepath.stat().st_size > MAX_FILE_SIZE:
+                continue
+
+            rel_path = str(filepath.relative_to(root))
+            try:
+                content = filepath.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+
+            files.append(SourceFile(path=rel_path, content=content))
+
+            if len(files) >= HARD_FILE_CAP:
+                return sorted(files, key=lambda f: f.path)
 
     return sorted(files, key=lambda f: f.path)
 

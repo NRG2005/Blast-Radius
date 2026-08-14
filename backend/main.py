@@ -13,7 +13,8 @@ from pydantic import BaseModel
 
 load_dotenv()
 
-from analyzer import analyze_change, DependencyGraph
+from analyzer import analyze_change, analyze_change_scaled, DependencyGraph
+from repo_reader import read_repo_tree, MAX_FILES
 from sandbox import run_sandbox, SandboxResult
 
 app = FastAPI(title="Blast Radius API", version="1.0.0")
@@ -105,12 +106,25 @@ async def analyze(req: AnalyzeRequest):
             diff = data.get("diff")
 
     try:
-        graph = await analyze_change(
-            repo_path=str(repo_path),
-            change_description=req.change_description,
-            diff=diff,
-            timeout=60.0,
-        )
+        # Seed-repo scenarios (and any repo under the file cap) always take
+        # the original, unscaled path — analyze_change is untouched by the
+        # repo-scaling work. Only repos that actually exceed MAX_FILES go
+        # through the triage pipeline.
+        file_count = len(read_repo_tree(str(repo_path)))
+        if file_count > MAX_FILES:
+            graph = await analyze_change_scaled(
+                repo_path=str(repo_path),
+                change_description=req.change_description,
+                diff=diff,
+                timeout=75.0,
+            )
+        else:
+            graph = await analyze_change(
+                repo_path=str(repo_path),
+                change_description=req.change_description,
+                diff=diff,
+                timeout=60.0,
+            )
         return graph
     except TimeoutError as e:
         raise HTTPException(status_code=504, detail=f"LLM timeout: {e}")
