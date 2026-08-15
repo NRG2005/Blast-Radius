@@ -58,6 +58,11 @@ export default function Graph({ graphData, sandboxResults, onNodeClick, animatin
 
   const paintNode = useCallback(
     (node, ctx, globalScale) => {
+      // Before the force simulation assigns real coordinates (the very
+      // first paint call), node.x/y can be non-finite — createRadialGradient
+      // throws on that and crashes the whole canvas. Skip this frame.
+      if (!Number.isFinite(node.x) || !Number.isFinite(node.y)) return;
+
       const color = nodeColor(node, sandboxResults);
       const size = NODE_SIZES[node.risk] || 7;
       const label = node.label || node.id;
@@ -148,6 +153,7 @@ export default function Graph({ graphData, sandboxResults, onNodeClick, animatin
         nodeCanvasObject={paintNode}
         nodeCanvasObjectMode={() => "replace"}
         nodePointerAreaPaint={(node, color, ctx) => {
+          if (!Number.isFinite(node.x) || !Number.isFinite(node.y)) return;
           const size = (NODE_SIZES[node.risk] || 7) + 4;
           ctx.beginPath();
           ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
