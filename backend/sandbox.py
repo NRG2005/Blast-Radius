@@ -33,6 +33,21 @@ class SandboxResult(BaseModel):
     raw_output: str
 
 
+_ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
+
+
+def _strip_ansi(text: str) -> str:
+    """
+    Strip ANSI color escape codes from subprocess output. Without this, a
+    test runner that emits color (pytest can, depending on the ambient
+    environment/PATH's python3 and its config, regardless of --color=no
+    flags we pass) breaks the PASSED/FAILED regex below silently — every
+    test then parses as unmatched, producing a false "0 passed, 0 failed,
+    all green" instead of the real result.
+    """
+    return _ANSI_ESCAPE_RE.sub("", text)
+
+
 def _run_git(args: list[str], cwd: str, check: bool = True) -> subprocess.CompletedProcess:
     return subprocess.run(
         ["git"] + args,
@@ -155,13 +170,19 @@ async def run_sandbox(
         # check back out to a branch that doesn't track them.
         _run_git(["commit", "-a", "-m", "blast-radius: apply proposed change", "--no-verify"], cwd=repo_path, check=False)
 
-        # Run tests
+        # Run tests. Force color off at the source (belt-and-suspenders —
+        # the output is also ANSI-stripped below regardless, since color
+        # can leak in from the ambient environment/PATH's python3/pytest
+        # regardless of these flags, e.g. a global pytest.ini or a
+        # different interpreter than expected picking up color-by-default).
         cmd = shlex.split(test_command or "python3 -m pytest -v --tb=short -m 'not slow'")
+        env = {**os.environ, "PY_COLORS": "0", "NO_COLOR": "1", "PYTEST_ADDOPTS": "--color=no"}
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             cwd=repo_path,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
+            env=env,
         )
         try:
             stdout_bytes, _ = await asyncio.wait_for(proc.communicate(), timeout=timeout)
@@ -169,7 +190,7 @@ async def run_sandbox(
             proc.kill()
             raise TimeoutError(f"Test suite timed out after {timeout}s")
 
-        raw_output = stdout_bytes.decode("utf-8", errors="replace")
+        raw_output = _strip_ansi(stdout_bytes.decode("utf-8", errors="replace"))
 
         # Parse pytest output
         test_results = _parse_pytest_output(raw_output, node_map)
