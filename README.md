@@ -6,7 +6,9 @@ Built for the OpenAI × Codex build event.
 
 ## Demo Video
 
-[Demo video link here]
+<video src="demo/demo-video.mp4" controls width="100%"></video>
+
+(If the player above doesn't render, [download/view the video directly](demo/demo-video.mp4).)
 
 ## The Problem
 
