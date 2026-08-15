@@ -18,18 +18,18 @@ export default function App({ onBackToLanding }) {
   const [error, setError] = useState(null);
 
   // Keep track of the current scenario for sandbox run
-  const currentScenario = useRef({ scenarioId: null, diff: null });
+  const currentScenario = useRef({ scenarioId: null, diff: null, repoPath: null, testCommand: null });
 
-  const handleAnalyze = useCallback(async ({ scenarioId, changeDescription, diff }) => {
+  const handleAnalyze = useCallback(async ({ scenarioId, changeDescription, diff, repoPath, testCommand }) => {
     setStatus("loading");
     setError(null);
     setGraphData(EMPTY_GRAPH);
     setSelectedNode(null);
     setSandboxResult(null);
-    currentScenario.current = { scenarioId, diff };
+    currentScenario.current = { scenarioId, diff, repoPath, testCommand };
 
     try {
-      const graph = await analyzeChange({ scenarioId, changeDescription, diff });
+      const graph = await analyzeChange({ scenarioId, changeDescription, diff, repoPath });
       setGraphData(graph);
       setStatus("ready");
     } catch (err) {
@@ -39,9 +39,13 @@ export default function App({ onBackToLanding }) {
   }, []);
 
   const handleRunSandbox = useCallback(async () => {
-    const { scenarioId, diff } = currentScenario.current;
-    if (!diff && !scenarioId) {
-      setError("No diff available to apply. Provide a diff or select a scenario.");
+    const { scenarioId, diff, repoPath, testCommand } = currentScenario.current;
+    if (!diff) {
+      setError("No diff available to apply — Run It needs an actual diff, not just a plain-English description.");
+      return;
+    }
+    if (!scenarioId && !repoPath) {
+      setError("No repo to run against. Select a scenario or provide a repo path.");
       return;
     }
 
@@ -60,6 +64,8 @@ export default function App({ onBackToLanding }) {
         scenarioId,
         diff,
         nodeMap,
+        repoPath,
+        testCommand,
       });
       setSandboxResult(result);
       setSandboxLoading(false);

@@ -183,6 +183,13 @@ html, body, #root { height: 100%; }
 }
 .input-hint strong { color: var(--text-secondary); font-weight: 600; }
 
+.input-label-optional {
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
 .input-select,
 .input-textarea {
   background: linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));

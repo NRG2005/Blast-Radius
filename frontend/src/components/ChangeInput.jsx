@@ -11,6 +11,8 @@ export default function ChangeInput({
   const [changeDescription, setChangeDescription] = useState("");
   const [diff, setDiff] = useState("");
   const [showDiff, setShowDiff] = useState(false);
+  const [repoPath, setRepoPath] = useState("");
+  const [testCommand, setTestCommand] = useState("");
 
   // The description/diff exactly as auto-filled from the selected scenario.
   // Used to detect "user edited the description but left the old diff in
@@ -61,10 +63,19 @@ export default function ChangeInput({
     }
   }
 
+  const isCustom = scenarioId === "";
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!changeDescription.trim()) return;
-    onAnalyze({ scenarioId, changeDescription, diff });
+    if (isCustom && !repoPath.trim()) return;
+    onAnalyze({
+      scenarioId,
+      changeDescription,
+      diff,
+      repoPath: isCustom ? repoPath.trim() : undefined,
+      testCommand: isCustom ? testCommand.trim() || undefined : undefined,
+    });
   }
 
   return (
@@ -89,6 +100,40 @@ export default function ChangeInput({
           ))}
         </select>
       </div>
+
+      {/* Custom repo path — only shown for "Custom Repo" */}
+      {isCustom && (
+        <>
+          <div className="input-row">
+            <label className="input-label" htmlFor="repo-path">
+              Repo Path
+            </label>
+            <input
+              id="repo-path"
+              type="text"
+              className="input-select"
+              value={repoPath}
+              onChange={(e) => setRepoPath(e.target.value)}
+              placeholder="/absolute/path/to/your/repo"
+              disabled={disabled || loading}
+            />
+          </div>
+          <div className="input-row">
+            <label className="input-label" htmlFor="test-command">
+              Test Command <span className="input-label-optional">(optional)</span>
+            </label>
+            <input
+              id="test-command"
+              type="text"
+              className="input-select mono"
+              value={testCommand}
+              onChange={(e) => setTestCommand(e.target.value)}
+              placeholder="e.g. npm test — used by Run It"
+              disabled={disabled || loading}
+            />
+          </div>
+        </>
+      )}
 
       {/* Change description */}
       <div className="input-row">
@@ -135,7 +180,7 @@ export default function ChangeInput({
         id="analyze-btn"
         type="submit"
         className={`analyze-btn ${loading ? "loading" : ""}`}
-        disabled={disabled || loading || !changeDescription.trim()}
+        disabled={disabled || loading || !changeDescription.trim() || (isCustom && !repoPath.trim())}
       >
         {loading ? (
           <>

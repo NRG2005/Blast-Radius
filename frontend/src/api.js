@@ -6,12 +6,13 @@ export async function fetchExamples() {
   return res.json();
 }
 
-export async function analyzeChange({ scenarioId, changeDescription, diff }) {
+export async function analyzeChange({ scenarioId, changeDescription, diff, repoPath }) {
   const body = {
     change_description: changeDescription,
   };
   if (scenarioId) body.scenario_id = scenarioId;
   if (diff) body.diff = diff;
+  if (repoPath) body.repo_path = repoPath;
 
   const res = await fetch(`${API_BASE}/analyze`, {
     method: "POST",
@@ -26,13 +27,14 @@ export async function analyzeChange({ scenarioId, changeDescription, diff }) {
   return res.json();
 }
 
-export async function runSandbox({ scenarioId, diff, nodeMap, testCommand }) {
+export async function runSandbox({ scenarioId, diff, nodeMap, testCommand, repoPath }) {
   const body = {
     diff,
     node_map: nodeMap,
   };
   if (scenarioId) body.scenario_id = scenarioId;
   if (testCommand) body.test_command = testCommand;
+  if (repoPath) body.repo_path = repoPath;
 
   const res = await fetch(`${API_BASE}/run-sandbox`, {
     method: "POST",
