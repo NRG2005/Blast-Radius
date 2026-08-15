@@ -176,6 +176,13 @@ html, body, #root { height: 100%; }
   color: var(--text-muted);
 }
 
+.input-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.input-hint strong { color: var(--text-secondary); font-weight: 600; }
+
 .input-select,
 .input-textarea {
   background: linear-gradient(180deg, var(--bg-elevated), var(--bg-surface));
