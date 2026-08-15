@@ -13,11 +13,11 @@ const CONFIRMED_LABELS = {
   not_run: { label: "— NOT RUN", color: "#56565f", bg: "#56565f15" },
 };
 
-const NODE_TYPE_ICONS = {
-  change: "⚡",
-  test: "🧪",
-  module: "📦",
-  config: "⚙️",
+const NODE_TYPE_TAGS = {
+  change: "CHG",
+  test: "TEST",
+  module: "MOD",
+  config: "CFG",
 };
 
 export default function NodePanel({ node, sandboxResult, onClose }) {
@@ -33,7 +33,7 @@ export default function NodePanel({ node, sandboxResult, onClose }) {
       </button>
 
       <div className="node-panel-header">
-        <span className="node-type-icon">{NODE_TYPE_ICONS[node.node_type] || "📄"}</span>
+        <span className="node-type-tag">{NODE_TYPE_TAGS[node.node_type] || "FILE"}</span>
         <div>
           <h2 className="node-panel-title">{node.label}</h2>
           <p className="node-panel-path">{node.file_path}</p>

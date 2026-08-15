@@ -114,8 +114,8 @@ export default function ChangeInput({
           </>
         ) : (
           <>
-            <span className="btn-icon">⚡</span>
             Analyze Blast Radius
+            <span className="cta-arrow">→</span>
           </>
         )}
       </button>
