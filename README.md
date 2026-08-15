@@ -1,3 +1,5 @@
+
+
 # Blast Radius
 
 **Pre-commit semantic impact analysis.** See what breaks before you commit — not just who calls the changed code, but whose tests, configs, and quiet assumptions it violates. Then prove it, live, by actually running the change in a sandbox.
@@ -7,6 +9,8 @@ Built for the OpenAI × Codex build event.
 ## Demo Video
 
 <video src="demo/demo-video.mp4" controls width="100%"></video>
+
+https://github.com/user-attachments/assets/a5c12f10-4a4b-4a7f-b359-27495934cf1e
 
 (If the player above doesn't render, [download/view the video directly](demo/demo-video.mp4).)
 
